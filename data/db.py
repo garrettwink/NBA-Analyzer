@@ -1,6 +1,8 @@
 from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, ForeignKey, PrimaryKeyConstraint
 from sqlalchemy.orm import DeclarativeBase
 
+engine = create_engine('sqlite:///nba.db')
+
 class Base(DeclarativeBase):
     pass
 
@@ -8,7 +10,7 @@ class Base(DeclarativeBase):
 class Players(Base):
     __tablename__ = 'players'
 
-    player_id = Column(Integer, primary_key=True, autoincrement=True)
+    player_id = Column(Integer, primary_key=True)
     name = Column(String)
     position = Column(String)
     draft_year = Column(Integer)
@@ -36,10 +38,11 @@ class Stats(Base):
     ft_pct = Column(Float)
     gp = Column(Integer)
     mpg = Column(Float)
-    win_shares = Column(Float)
-    vorp = Column(Float)
-    per = Column(Float)
     usg_pct = Column(Float)
+    net_rating = Column(Float)
+    pie = Column(Float)
+    ts_pct = Column(Float)
+    age = Column(Float)
 
 # Teams, only one entry per season
 class Teams(Base):
@@ -52,8 +55,6 @@ class Teams(Base):
     playoffs = Column(Boolean)
     championship = Column(Boolean)
 
-# engine and table creation
-engine = create_engine('sqlite:///nba.db')
 Base.metadata.create_all(engine)
 
 
