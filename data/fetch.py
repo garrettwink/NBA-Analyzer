@@ -1,5 +1,4 @@
-from nba_api.stats.endpoints import commonplayerinfo, leaguedashplayerstats
-from nba_api.stats.static import players, teams
+from nba_api.stats.endpoints import commonplayerinfo, leaguedashplayerstats, leaguestandings
 import time
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select
@@ -85,8 +84,34 @@ def populate_stats():
                 session.merge(stat_obj)
             session.commit()
 
+
+def populate_teams():
+    seasons = ['2020-21', '2021-22', '2022-23', '2023-24', '2024-25', '2025-26']
+
+    with Session() as session:
+        for season in seasons:
+            season_int = int(season.split('-')[0])
+            stats = leaguestandings.LeagueStandings(season=season, timeout=60).get_data_frames()[0]
+
+            for index, row in stats.iterrows():
+
+                playoffs = bool(row['ClinchedPlayoffBirth']) if not pd.isna(row['ClinchedPlayoffBirth']) else False
+                team_obj = Teams(
+                    team_id = row['TeamID'],
+                    team_name = row['TeamName'],
+                    season = season_int,
+                    record = row['Record'],
+                    win_pct = row['WinPCT'],
+                    playoffs = playoffs
+                )
+
+                print(f"Adding {team_obj.team_name}")
+                session.merge(team_obj)
+            session.commit()
+
+
 if __name__ == '__main__':
-    populate_players()
+    populate_teams()
 
 
     

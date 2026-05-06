@@ -53,10 +53,11 @@ class Teams(Base):
     __table_args__ = (PrimaryKeyConstraint('team_id', 'season'),)
 
     team_id = Column(Integer)
+    team_name = Column(String)
     season = Column(Integer)
     record = Column(String)
+    win_pct = Column(Float)
     playoffs = Column(Boolean)
-    championship = Column(Boolean)
 
 Base.metadata.create_all(engine)
 
