@@ -40,7 +40,7 @@ class PlayerSchema(BaseModel):
     class Config:
         from_attributes = True
 
-class PlayerDetailedSchema(BaseModel):
+class PlayerStatSchema(BaseModel):
     player_id: int
     name: str
     position: str

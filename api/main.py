@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select
 from data.db import engine, Players, Teams, Stats
-from api.schemas import PlayerSchema, TeamSchema, PlayerDetailedSchema
+from api.schemas import PlayerSchema, TeamSchema, PlayerStatSchema
 
 Session = sessionmaker(bind=engine)
 app = FastAPI()
@@ -26,7 +26,7 @@ def get_players():
 
         return players
 
-@app.get("/players/{player_id}", response_model=PlayerDetailedSchema)
+@app.get("/players/{player_id}", response_model=PlayerStatSchema)
 def get_player_id(player_id: int):
     with Session() as session:
         player = session.execute(select(Players).where(Players.player_id == player_id)).scalar_one_or_none()
