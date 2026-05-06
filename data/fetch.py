@@ -1,4 +1,4 @@
-from nba_api.stats.endpoints import commonplayerinfo, leagueleaders, leaguedashplayerstats
+from nba_api.stats.endpoints import commonplayerinfo, leaguedashplayerstats
 from nba_api.stats.static import players, teams
 import time
 from sqlalchemy.orm import sessionmaker
@@ -38,11 +38,12 @@ def populate_stats():
     seasons = ['2019-20', '2020-21', '2021-22', '2022-23', '2023-24', '2024-25']
 
     with Session() as session:
+
         for season in seasons:
             season_int = int(season.split('-')[0])
-            stats1 = leagueleaders.LeagueLeaders(season=season, timeout=60).get_data_frames()[0]
+            stats1 = leaguedashplayerstats.LeagueDashPlayerStats(season=season, measure_type_detailed_defense='Base', timeout=60).get_data_frames()[0]
             stat_basic = stats1[['PLAYER_ID','TEAM_ID','GP','PTS','AST','REB','OREB','DREB','STL','BLK','TOV','FG_PCT','FG3_PCT','FT_PCT']]
-            stats2 = leaguedashplayerstats.LeagueDashPlayerStats(season='2024-25', timeout=60).get_data_frames()[0]
+            stats2 = leaguedashplayerstats.LeagueDashPlayerStats(season=season, measure_type_detailed_defense='Advanced', timeout=60).get_data_frames()[0]
             stat_adv = stats2[['PLAYER_ID','AGE','MIN','USG_PCT','NET_RATING','PIE','TS_PCT']]
             stats = pd.merge(stat_basic, stat_adv, on='PLAYER_ID')
             stats['MPG'] = stats['MIN'] / stats['GP']
@@ -72,9 +73,9 @@ def populate_stats():
                     age = row['AGE']
                 )
 
-                session.add(stat_obj)
+                print(f"Adding {stat_obj.player_id}")
+                session.merge(stat_obj)
             session.commit()
-
 
 if __name__ == '__main__':
     populate_stats()
