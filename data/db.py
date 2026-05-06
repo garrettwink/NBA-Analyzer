@@ -11,7 +11,7 @@ class Players(Base):
     __tablename__ = 'players'
 
     player_id = Column(Integer, primary_key=True)
-    birthdate = Column(String)
+    birth_date = Column(String)
     name = Column(String)
     position = Column(String)
     draft_year = Column(String)
@@ -57,7 +57,7 @@ class Teams(Base):
     season = Column(Integer)
     record = Column(String)
     win_pct = Column(Float)
-    playoff_clinch = Column(Float)
+    playoff_clinch = Column(Boolean)
 
 
 Base.metadata.create_all(engine)

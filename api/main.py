@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import select
 from data.db import engine, Players, Teams, Stats
 
 Session = sessionmaker(bind=engine)
@@ -18,5 +19,10 @@ def home():
     pass
 
 @app.get("/players")
+def get_players():
+    with Session() as session:
+        players = session.execute(select(Players)).scalars().all()
+
+        return players
 
 
