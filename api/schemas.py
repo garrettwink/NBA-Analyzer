@@ -1,5 +1,6 @@
-from pydantic import BaseModel
 from datetime import date
+
+from pydantic import BaseModel, Field
 
 
 class StatSchema(BaseModel):
@@ -48,7 +49,7 @@ class PlayerStatSchema(BaseModel):
     birth_date: date
     height: str
     weight: str
-    stats: list[StatSchema] = []
+    stats: list[StatSchema] = Field(default_factory=list)
 
     class Config:
         from_attributes = True

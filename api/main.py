@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import select
+from sqlalchemy import select, func
 from data.db import engine, Players, Teams, Stats
 from api.schemas import PlayerSchema, TeamSchema, PlayerStatSchema
 
@@ -17,7 +17,27 @@ app.add_middleware(
 
 @app.get("/")
 def home():
-    pass
+    with Session() as session:
+        player_count = session.scalar(select(func.count()).select_from(Players))
+        team_count = session.scalar(select(func.count()).select_from(Teams))
+        season_count = session.scalar(select(func.count(func.distinct(Stats.season))))
+
+    return {
+        'title': 'NBA Analyzer Dashboard',
+        'description': 'A simple API dashboard placeholder for future live game and analytics data.',
+        'summary': {
+            'players': player_count,
+            'teams': team_count,
+            'seasons': season_count,
+        },
+        'endpoints': [
+            '/players',
+            '/players/{player_id}',
+            '/teams',
+        ],
+        'current_games': [],
+        'note': 'Current games are not yet available. Future versions can add live matchup data here.',
+    }
 
 @app.get("/players", response_model=list[PlayerSchema])
 def get_players():
@@ -34,10 +54,18 @@ def get_player_id(player_id: int):
 
         if player is None:
             raise HTTPException(status_code=404, detail='Player not found')
-        
-        result = player.__dict__
-        result['stats'] = stats
-        
+
+        result = {
+            'player_id': player.player_id,
+            'name': player.name,
+            'position': player.position,
+            'draft_year': player.draft_year,
+            'birth_date': player.birth_date,
+            'height': player.height,
+            'weight': player.weight,
+            'stats': stats,
+        }
+
         return result
     
 @app.get("/teams", response_model=list[TeamSchema])
