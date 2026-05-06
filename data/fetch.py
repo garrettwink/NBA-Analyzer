@@ -19,12 +19,12 @@ def populate_players():
 
             player_obj = Players(
                 player_id = int(pl.iloc[0]['PERSON_ID']),
-                birthdate = pl.iloc[0]['BIRTHDATE'],
+                birthdate = pl.iloc[0]['BIRTH_DATE'],
                 name = pl.iloc[0]['DISPLAY_FIRST_LAST'],
                 position = pl.iloc[0]['POSITION'],
                 draft_year = pl.iloc[0]['DRAFT_YEAR'],
-                height = pl.iloc[0]['HEIGHT'],
-                weight = pl.iloc[0]['WEIGHT']
+                height = int(pl.iloc[0]['HEIGHT']),
+                weight = int(pl.iloc[0]['WEIGHT'])
             )
 
             print(f"Adding {pl.iloc[0]['DISPLAY_FIRST_LAST']}")
