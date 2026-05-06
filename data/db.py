@@ -11,9 +11,12 @@ class Players(Base):
     __tablename__ = 'players'
 
     player_id = Column(Integer, primary_key=True)
+    birthdate = Column(String)
     name = Column(String)
     position = Column(String)
-    draft_year = Column(Integer)
+    draft_year = Column(String)
+    height = Column(String)
+    weight = Column(String)
 
 # Stats of each player, can have multiple team ids during one season
 class Stats(Base):
