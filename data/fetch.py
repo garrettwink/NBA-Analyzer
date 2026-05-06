@@ -1,4 +1,4 @@
-from nba_api.stats.endpoints import commonplayerinfo, leaguedashplayerstats, leaguestandings
+from nba_api.stats.endpoints import commonplayerinfo, leaguedashplayerstats, leaguestandingsv3
 import time
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select
@@ -91,18 +91,18 @@ def populate_teams():
     with Session() as session:
         for season in seasons:
             season_int = int(season.split('-')[0])
-            stats = leaguestandings.LeagueStandings(season=season, timeout=60).get_data_frames()[0]
+            stats = leaguestandingsv3.LeagueStandingsV3(season=season, timeout=60).get_data_frames()[0]
 
             for index, row in stats.iterrows():
-
                 playoffs = bool(row['ClinchedPlayoffBirth']) if not pd.isna(row['ClinchedPlayoffBirth']) else False
+
                 team_obj = Teams(
                     team_id = row['TeamID'],
                     team_name = row['TeamName'],
                     season = season_int,
                     record = row['Record'],
                     win_pct = row['WinPCT'],
-                    playoffs = playoffs
+                    playoff_clinch = playoffs
                 )
 
                 print(f"Adding {team_obj.team_name}")

@@ -57,7 +57,8 @@ class Teams(Base):
     season = Column(Integer)
     record = Column(String)
     win_pct = Column(Float)
-    playoffs = Column(Boolean)
+    playoff_clinch = Column(Float)
+
 
 Base.metadata.create_all(engine)
 
