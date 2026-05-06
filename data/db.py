@@ -45,7 +45,7 @@ class Stats(Base):
     net_rating = Column(Float)
     pie = Column(Float)
     ts_pct = Column(Float)
-    age = Column(Float)
+    age = Column(Integer)
 
 # Teams, only one entry per season
 class Teams(Base):
