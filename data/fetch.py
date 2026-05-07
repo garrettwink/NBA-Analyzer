@@ -1,5 +1,5 @@
 from nba_api.stats.endpoints import commonplayerinfo, leaguedashplayerstats, leaguestandingsv3
-from nba_api.stats.library.http import NBAStatsHTTPTimeoutError
+from nba_api.stats.library.http import NBAStatsHTTP
 import time
 from requests.exceptions import RequestException
 from sqlalchemy.orm import sessionmaker
@@ -18,7 +18,7 @@ def safe_get_data_frame(endpoint_cls, *args, **kwargs):
     for attempt in range(1, MAX_RETRIES + 1):
         try:
             return endpoint_cls(*args, **kwargs).get_data_frames()[0]
-        except (RequestException, NBAStatsHTTPTimeoutError, TimeoutError, ValueError) as exc:
+        except (RequestException, NBAStatsHTTP, TimeoutError, ValueError) as exc:
             last_exc = exc
             if attempt == MAX_RETRIES:
                 break
