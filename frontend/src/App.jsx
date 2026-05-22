@@ -1,33 +1,30 @@
-import {useEffect, useState } from 'react'
-import './App.css'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import Layout from './Layout'
+import HomePage from './pages/HomePage'
+import PlayersPage from './pages/PlayersPage'
+import SearchPage from './pages/SearchPage'
 
-function App() {
-  const [players, setPlayers] = useState([])
-  
-  useEffect(() => {
-    fetch('http://localhost:8000/players')
-      .then(response => response.json())
-      .then(data => {
-        setPlayers(data)
-      })
-      .catch(error => console.error('Error fetching players:', error))
-  })
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Layout />,
+    children: [
+      {
+        path: "/",
+        element: <HomePage />
+      },
+      {
+        path: "/players",
+        element: <PlayersPage />
+      },
+      {
+        path: "/search",
+        element: <SearchPage />
+      }
+    ]
+  }
+])
 
-
-  return (
-    <>
-      <div>
-        <h1>NBA Players</h1>
-        <ul>
-          {players.map(player => (
-            <li key={player.id}>
-              {player.name} - {player.position}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </>
-  )
+export default function App() {
+  return <RouterProvider router={router} />
 }
-
-export default App
