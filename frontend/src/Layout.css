@@ -7,12 +7,86 @@ nav {
 
 nav a {
   text-decoration: none;
-  color: #333;
+  color: #ffffff;
   font-weight: 500;
 }
 
 nav a:hover {
   color: #007bff;
+}
+
+.player-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  color: #0f172a;
+}
+
+.player-header {
+  background: #01071b;
+  border: 1px solid #d5e0eb;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+}
+
+.player-header h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+}
+
+.player-header p {
+  margin: 0;
+  color: #ffffff;
+  line-height: 1.7;
+}
+
+.stats-section h2 {
+  margin-bottom: 1rem;
+  color: #ffffff;
+}
+
+.season-card {
+  background: #01071b;
+  border: 1px solid #dbe5ef;
+  border-radius: 18px;
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 1rem;
+}
+
+.season-card h3 {
+  margin: 0 0 1rem;
+  color: #ffffff;
+  font-size: 1.05rem;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.9rem;
+}
+
+.stat-grid div {
+  padding: 0.85rem 0.95rem;
+  background: #000000;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.stat-grid dt {
+  font-size: 0.82rem;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-grid dd {
+  margin: 0.35rem 0 0;
+  font-weight: 700;
+  color: #ffffff;
 }
 
 main {

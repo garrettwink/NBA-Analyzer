@@ -3,6 +3,7 @@ import Layout from './Layout'
 import HomePage from './pages/HomePage'
 import PlayersPage from './pages/PlayersPage'
 import SearchPage from './pages/SearchPage'
+import PlayersIndividualPage from './pages/PlayersIndividualPage'
 
 const router = createBrowserRouter([
   {
@@ -20,6 +21,10 @@ const router = createBrowserRouter([
       {
         path: "/search",
         element: <SearchPage />
+      },
+      {
+        path: "/players/:playerId",
+        element: <PlayersIndividualPage />
       }
     ]
   }

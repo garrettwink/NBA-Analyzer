@@ -1,3 +1,8 @@
 export default function SearchPage() {
-  return <h1>Search Players</h1>
+  return (
+    <div>
+    <h1>Search Page</h1>
+    <p>To be implemented</p>
+    </div>
+  )
 }
