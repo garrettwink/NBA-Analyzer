@@ -5,18 +5,28 @@ export default function PlayersIndividualPage() {
     const { playerId } = useParams()
     const [player, setPlayer] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
 
     useEffect(() => {
-        fetch('http://localhost:8000/players/' + playerId)
-        .then(response => response.json())
+        fetch(`http://localhost:8000/players/${playerId}`)
+        .then(response => {
+            if (!response.ok) 
+              throw new Error('Player doesn\'t exist')
+            return response.json()
+        })
+
         .then(data => {
           setPlayer(data);
           setLoading(false);
         })
-        .catch(error => console.error('Error:', error))
+        .catch(error => {
+          setError(error.message);
+          setLoading(false);
+        })
     }, [playerId]);
 
     if (loading) return <div>Loading...</div>
+    if (error) return <div>Error: {error}</div>
 
   return (
     <div className="player-page">
