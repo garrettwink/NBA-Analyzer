@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 export default function PlayersPage() {
   const [players, setPlayers] = useState([])
@@ -13,13 +14,17 @@ export default function PlayersPage() {
   return (
     <div>
       <h1>NBA Players</h1>
+
       <ul>
         {players.map(player => (
           <li key={player.player_id}>
-            {player.name} - {player.position}
+            <Link to={`/players/${player.player_id}`}>
+              {player.name} - {player.position}
+            </Link>
           </li>
         ))}
       </ul>
+      
     </div>
   )
 }
