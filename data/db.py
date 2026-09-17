@@ -1,12 +1,27 @@
-from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, ForeignKey, PrimaryKeyConstraint
+from datetime import datetime
+
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    PrimaryKeyConstraint,
+    String,
+    Text,
+    create_engine,
+)
 from sqlalchemy.orm import DeclarativeBase
 
 engine = create_engine('sqlite:///nba.db')
 
+
 class Base(DeclarativeBase):
     pass
 
-# Core player identity, info that doesn't change during a season
+
+# Raw player identity data; useful for metadata and lookups.
 class Players(Base):
     __tablename__ = 'players'
 
@@ -18,7 +33,8 @@ class Players(Base):
     height = Column(String)
     weight = Column(String)
 
-# Stats of each player, can have multiple team ids during one season
+
+# Raw seasonal player stats from the NBA API.
 class Stats(Base):
     __tablename__ = 'stats'
     __table_args__ = (PrimaryKeyConstraint('player_id', 'team_id', 'season'),)
@@ -26,8 +42,7 @@ class Stats(Base):
     player_id = Column(Integer, ForeignKey('players.player_id'))
     team_id = Column(Integer, ForeignKey('teams.team_id'))
     season = Column(Integer)
-    
-    # Actual player stats measured - long chunk incoming
+
     pts = Column(Float)
     ast = Column(Float)
     reb = Column(Float)
@@ -47,7 +62,8 @@ class Stats(Base):
     ts_pct = Column(Float)
     age = Column(Integer)
 
-# Teams, only one entry per season
+
+# Raw team season records.
 class Teams(Base):
     __tablename__ = 'teams'
     __table_args__ = (PrimaryKeyConstraint('team_id', 'season'),)
@@ -59,7 +75,61 @@ class Teams(Base):
     win_pct = Column(Float)
     playoff_clinch = Column(Boolean)
 
-class
+
+# Model-ready table: one row per player-season record used for award modeling.
+class PlayerSeasonHistory(Base):
+    __tablename__ = 'player_season_history'
+    __table_args__ = (PrimaryKeyConstraint('player_id', 'season', 'team_id'),)
+
+    player_id = Column(Integer, ForeignKey('players.player_id'))
+    team_id = Column(Integer, ForeignKey('teams.team_id'))
+    season = Column(Integer)
+
+    pts = Column(Float)
+    ast = Column(Float)
+    reb = Column(Float)
+    off_reb = Column(Float)
+    def_reb = Column(Float)
+    stl = Column(Float)
+    blk = Column(Float)
+    tov = Column(Float)
+    fg_pct = Column(Float)
+    fg3_pct = Column(Float)
+    ft_pct = Column(Float)
+    gp = Column(Integer)
+    mpg = Column(Float)
+    usg_pct = Column(Float)
+    net_rating = Column(Float)
+    pie = Column(Float)
+    ts_pct = Column(Float)
+    age = Column(Integer)
+
+    team_record = Column(String)
+    team_win_pct = Column(Float)
+    playoff_clinch = Column(Boolean)
+
+    mvp_winner = Column(Boolean, default=False)
+    mvp_rank = Column(Integer, nullable=True)
+    mvp_vote_share = Column(Float, nullable=True)
+
+
+# Current prediction output for the MVP page. This is what the frontend should read.
+class AwardPrediction(Base):
+    __tablename__ = 'award_prediction'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    award_name = Column(String, nullable=False)
+    season = Column(Integer, nullable=False)
+    predicted_player_id = Column(Integer, ForeignKey('players.player_id'))
+    predicted_player_name = Column(String, nullable=False)
+    predicted_team_name = Column(String, nullable=True)
+    probability = Column(Float, nullable=True)
+    confidence = Column(Float, nullable=True)
+    ranking = Column(Integer, nullable=True)
+    top_reasons = Column(Text, nullable=True)
+    model_version = Column(String, nullable=True)
+    generated_at = Column(DateTime, default=datetime.utcnow)
+
 
 Base.metadata.create_all(engine)
 
