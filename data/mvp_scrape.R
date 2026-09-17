@@ -1,3 +1,5 @@
+install.packages("hoopR")
+
 library(hoopR)
 library(dplyr)
 library(DBI)
@@ -27,18 +29,12 @@ if ("award" %in% names(all_awards)) {
 # Normalized player names so they can match the database names
 all_awards <- all_awards %>%
   mutate(
-    player_name = if ("player" %in% names(.)) player else NA_character_,
-    player_name_clean = tolower(str_trim(player_name)),
-    player_name_clean = str_replace_all(player_name_clean, "\\s+", " ")
+    player_name = if ("player" %in% names(.)) player else NA_character_
   )
 
 # Pull player lookup from SQLite to map names to player_id
 con <- dbConnect(RSQLite::SQLite(), "nba.db")
 players_lookup <- dbGetQuery(con, "SELECT name, player_id FROM players") %>%
-  mutate(
-    name_clean = tolower(str_trim(name)),
-    name_clean = str_replace_all(name_clean, "\\s+", " ")
-  ) %>%
   select(player_id, name_clean)
 
 # Join the award data to player_id using matching names
@@ -48,7 +44,11 @@ mvp_table <- all_awards %>%
     player_id,
     player_name,
     season,
-    everything()
+    rank,
+    age,
+    team,
+    points_won,
+    award_share
   ) %>%
   filter(!is.na(player_id))
 

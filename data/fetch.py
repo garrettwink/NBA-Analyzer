@@ -156,6 +156,7 @@ def build_historical_dataset(seasons: list[str]) -> pd.DataFrame:
     # MVP voting results) is decided.
     full_df["mvp_winner"] = False
     full_df["mvp_rank"] = None
+    full_df["points_won"] = None
     full_df["mvp_vote_share"] = None
 
     return full_df

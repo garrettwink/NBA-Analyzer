@@ -76,6 +76,7 @@ class PlayerSeasonHistory(Base):
 
     mvp_winner = Column(Boolean, default=False)
     mvp_rank = Column(Integer, nullable=True)
+    points_won = Column(Integer, nullable=True)
     mvp_vote_share = Column(Float, nullable=True)
 
 
