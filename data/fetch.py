@@ -211,7 +211,7 @@ def save_historical_dataset(df: pd.DataFrame):
 
 
 if __name__ == "__main__":
-    seasons = ["2020-21", "2021-22", "2022-23", "2023-24", "2024-25", "2025-26"]
+    seasons = [f"{year}-{str(year + 1)[-2:]}" for year in range(2010, 2025)]
     df = build_historical_dataset(seasons)
     print(df.head())
     save_historical_dataset(df)
