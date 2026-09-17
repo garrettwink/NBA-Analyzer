@@ -59,6 +59,7 @@ class Teams(Base):
     win_pct = Column(Float)
     playoff_clinch = Column(Boolean)
 
+class
 
 Base.metadata.create_all(engine)
 
