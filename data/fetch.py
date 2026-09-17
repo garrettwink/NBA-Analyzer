@@ -5,6 +5,12 @@ from nba_api.stats.endpoints import leaguedashplayerstats, leaguestandingsv3
 from requests.exceptions import RequestException
 from sqlalchemy.orm import sessionmaker
 
+from clean import (
+    add_empty_mvp_labels,
+    clean_player_stats,
+    clean_team_standings,
+    combine_player_and_team_data,
+)
 from db import engine, Players, Teams, PlayerSeasonHistory
 
 Session = sessionmaker(bind=engine)
@@ -51,52 +57,7 @@ def fetch_player_season_stats(season: str) -> pd.DataFrame:
         timeout=120,
     )
 
-    required_base = [
-        "PLAYER_ID", "PLAYER_NAME", "TEAM_ID", "GP", "PTS", "AST", "REB",
-        "OREB", "DREB", "STL", "BLK", "TOV",
-        "FG_PCT", "FG3_PCT", "FT_PCT",
-    ]
-
-    required_advanced = [
-        "PLAYER_ID", "AGE", "MIN", "USG_PCT", "NET_RATING", "PIE", "TS_PCT",
-    ]
-
-    base = base[required_base]
-    advanced = advanced[required_advanced]
-
-    stats = pd.merge(base, advanced, on="PLAYER_ID", how="inner")
-
-    stats = stats.rename(columns={
-        "PLAYER_ID": "player_id",
-        "PLAYER_NAME": "player_name",
-        "TEAM_ID": "team_id",
-        "GP": "gp",
-        "PTS": "pts",
-        "AST": "ast",
-        "REB": "reb",
-        "OREB": "off_reb",
-        "DREB": "def_reb",
-        "STL": "stl",
-        "BLK": "blk",
-        "TOV": "tov",
-        "FG_PCT": "fg_pct",
-        "FG3_PCT": "fg3_pct",
-        "FT_PCT": "ft_pct",
-        "AGE": "age",
-        "MIN": "min",
-        "USG_PCT": "usg_pct",
-        "NET_RATING": "net_rating",
-        "PIE": "pie",
-        "TS_PCT": "ts_pct",
-    })
-
-    stats["season"] = int(season.split("-")[0])
-    stats["mpg"] = stats["min"] / stats["gp"]
-    stats["team_id"] = stats["team_id"].astype(int)
-    stats["player_id"] = stats["player_id"].astype(int)
-    stats["age"] = stats["age"].astype(int)
-
-    return stats.drop(columns=["min"])
+    return clean_player_stats(base, advanced, season)
 
 
 def fetch_team_standings(season: str) -> pd.DataFrame:
@@ -106,21 +67,7 @@ def fetch_team_standings(season: str) -> pd.DataFrame:
         timeout=120,
     )
 
-    required = ["TeamID", "TeamName", "Record", "WinPCT", "ClinchedPlayoffBirth"]
-    standings = standings[required]
-
-    standings = standings.rename(columns={
-        "TeamID": "team_id",
-        "TeamName": "team_name",
-        "Record": "record",
-        "WinPCT": "win_pct",
-    })
-
-    standings["season"] = int(season.split("-")[0])
-    standings["team_id"] = standings["team_id"].astype(int)
-    standings["playoff_clinch"] = standings["ClinchedPlayoffBirth"].fillna(False).astype(bool)
-
-    return standings[["season", "team_id", "team_name", "record", "win_pct", "playoff_clinch"]]
+    return clean_team_standings(standings, season)
 
 
 def build_historical_dataset(seasons: list[str]) -> pd.DataFrame:
@@ -137,29 +84,10 @@ def build_historical_dataset(seasons: list[str]) -> pd.DataFrame:
         team_standings = fetch_team_standings(season)
         time.sleep(1)
 
-        merged = player_stats.merge(
-            team_standings,
-            on=["season", "team_id"],
-            how="left",
-        )
-
-        merged = merged.rename(columns={
-            "record": "team_record",
-            "win_pct": "team_win_pct",
-        })
-
-        frames.append(merged)
+        frames.append(combine_player_and_team_data(player_stats, team_standings))
 
     full_df = pd.concat(frames, ignore_index=True)
-
-    # Target columns - fill in once labeling strategy (e.g. scraping actual
-    # MVP voting results) is decided.
-    full_df["mvp_winner"] = False
-    full_df["mvp_rank"] = None
-    full_df["points_won"] = None
-    full_df["mvp_vote_share"] = None
-
-    return full_df
+    return add_empty_mvp_labels(full_df)
 
 
 PLAYER_SEASON_HISTORY_COLS = [
