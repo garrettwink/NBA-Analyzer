@@ -26,23 +26,18 @@ if ("award" %in% names(all_awards)) {
     filter(grepl("MVP", award, ignore.case = TRUE))
 }
 
-# Normalized player names so they can match the database names
-all_awards <- all_awards %>%
-  mutate(
-    player_name = if ("player" %in% names(.)) player else NA_character_
-  )
-
 # Pull player lookup from SQLite to map names to player_id
 con <- dbConnect(RSQLite::SQLite(), "nba.db")
 players_lookup <- dbGetQuery(con, "SELECT name, player_id FROM players") %>%
-  select(player_id, name_clean)
+  select(player_id, name)
 
 # Join the award data to player_id using matching names
 mvp_table <- all_awards %>%
-  left_join(players_lookup, by = c("player_name_clean" = "name_clean")) %>%
+  left_join(players_lookup, by = c("player" = "name")) %>%
+
   select(
     player_id,
-    player_name,
+    player,
     season,
     rank,
     age,
@@ -50,7 +45,10 @@ mvp_table <- all_awards %>%
     points_won,
     award_share
   ) %>%
-  filter(!is.na(player_id))
+  filter(!is.na(player_id)) |>
+  rename(
+    'name' = 'player'
+  )
 
 # Save final MVP table to SQLite so it can join with the stats table
 if (nrow(mvp_table) > 0) {
