@@ -1,66 +1,25 @@
-from datetime import date
+from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
-class StatSchema(BaseModel):
-    player_id: int
-    team_id: int
+class AwardPredictionSchema(BaseModel):
+    """
+    The only thing the landing page reads: the current predicted
+    MVP (or other award) winner, as computed by the model.
+    """
+    id: int
+    award_name: str
     season: int
-    pts: float
-    ast: float
-    reb: float
-    off_reb: float
-    def_reb: float
-    stl: float
-    blk: float
-    tov: float
-    fg_pct: float
-    fg3_pct: float
-    ft_pct: float
-    gp: int
-    mpg: float
-    usg_pct: float
-    net_rating: float
-    pie: float
-    ts_pct: float
-    age: float
+    predicted_player_id: int
+    predicted_player_name: str
+    predicted_team_name: str | None = None
+    probability: float | None = None
+    confidence: float | None = None
+    ranking: int | None = None
+    top_reasons: str | None = None
+    model_version: str | None = None
+    generated_at: datetime
 
-    class Config:
-        from_attributes = True
-
-class PlayerSchema(BaseModel):
-    player_id: int
-    name: str
-    position: str
-    draft_year: str
-    birth_date: date
-    height: str
-    weight: str
-
-    class Config:
-        from_attributes = True
-
-class PlayerStatSchema(BaseModel):
-    player_id: int
-    name: str
-    position: str
-    draft_year: str
-    birth_date: date
-    height: str
-    weight: str
-    stats: list[StatSchema] = Field(default_factory=list)
-
-    class Config:
-        from_attributes = True
-
-class TeamSchema(BaseModel):
-    team_id: int
-    team_name: str
-    season: int
-    record: str
-    win_pct: float
-    playoff_clinch: bool
-    
     class Config:
         from_attributes = True

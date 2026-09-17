@@ -1,13 +1,11 @@
 import time
-from typing import List
 
 import pandas as pd
 from nba_api.stats.endpoints import leaguedashplayerstats, leaguestandingsv3
-from nba_api.stats.library.http import NBAStatsHTTP
 from requests.exceptions import RequestException
 from sqlalchemy.orm import sessionmaker
 
-from data.db import engine, Players, Teams, Stats
+from db import engine, Players, Teams, Stats, PlayerSeasonHistory
 
 Session = sessionmaker(bind=engine)
 
@@ -21,7 +19,7 @@ def safe_get_data_frame(endpoint_cls, *args, **kwargs):
     for attempt in range(1, MAX_RETRIES + 1):
         try:
             return endpoint_cls(*args, **kwargs).get_data_frames()[0]
-        except (RequestException, NBAStatsHTTP, TimeoutError, ValueError) as exc:
+        except (RequestException, TimeoutError, ValueError) as exc:
             last_exc = exc
             if attempt == MAX_RETRIES:
                 break
@@ -35,14 +33,14 @@ def safe_get_data_frame(endpoint_cls, *args, **kwargs):
 def fetch_player_season_stats(season: str) -> pd.DataFrame:
     """
     Pull player-season stats needed for MVP modeling.
-    This is the core dataset you will later train on.
+    Column names here are already aligned to db.py's Stats / PlayerSeasonHistory schema.
     """
     base = safe_get_data_frame(
         leaguedashplayerstats.LeagueDashPlayerStats,
         season=season,
         measure_type_detailed_defense="Base",
         per_mode_detailed="PerGame",
-        timeout=60,
+        timeout=120,
     )
 
     advanced = safe_get_data_frame(
@@ -50,90 +48,164 @@ def fetch_player_season_stats(season: str) -> pd.DataFrame:
         season=season,
         measure_type_detailed_defense="Advanced",
         per_mode_detailed="PerGame",
-        timeout=60,
+        timeout=120,
     )
 
     required_base = [
-        "PLAYER_ID", "TEAM_ID", "GP", "PTS", "AST", "REB",
+        "PLAYER_ID", "PLAYER_NAME", "TEAM_ID", "GP", "PTS", "AST", "REB",
         "OREB", "DREB", "STL", "BLK", "TOV",
-        "FG_PCT", "FG3_PCT", "FT_PCT"
+        "FG_PCT", "FG3_PCT", "FT_PCT",
     ]
 
     required_advanced = [
-        "PLAYER_ID", "AGE", "MIN", "USG_PCT", "NET_RATING", "PIE", "TS_PCT"
+        "PLAYER_ID", "AGE", "MIN", "USG_PCT", "NET_RATING", "PIE", "TS_PCT",
     ]
 
     base = base[required_base]
     advanced = advanced[required_advanced]
 
     stats = pd.merge(base, advanced, on="PLAYER_ID", how="inner")
-    stats["SEASON"] = int(season.split("-")[0])
-    stats["MPG"] = stats["MIN"] / stats["GP"]
-    stats["TEAM_ID"] = stats["TEAM_ID"].astype(int)
-    stats["PLAYER_ID"] = stats["PLAYER_ID"].astype(int)
 
-    return stats
+    stats = stats.rename(columns={
+        "PLAYER_ID": "player_id",
+        "PLAYER_NAME": "player_name",
+        "TEAM_ID": "team_id",
+        "GP": "gp",
+        "PTS": "pts",
+        "AST": "ast",
+        "REB": "reb",
+        "OREB": "off_reb",
+        "DREB": "def_reb",
+        "STL": "stl",
+        "BLK": "blk",
+        "TOV": "tov",
+        "FG_PCT": "fg_pct",
+        "FG3_PCT": "fg3_pct",
+        "FT_PCT": "ft_pct",
+        "AGE": "age",
+        "MIN": "min",
+        "USG_PCT": "usg_pct",
+        "NET_RATING": "net_rating",
+        "PIE": "pie",
+        "TS_PCT": "ts_pct",
+    })
+
+    stats["season"] = int(season.split("-")[0])
+    stats["mpg"] = stats["min"] / stats["gp"]
+    stats["team_id"] = stats["team_id"].astype(int)
+    stats["player_id"] = stats["player_id"].astype(int)
+    stats["age"] = stats["age"].astype(int)
+
+    return stats.drop(columns=["min"])
 
 
 def fetch_team_standings(season: str) -> pd.DataFrame:
     standings = safe_get_data_frame(
         leaguestandingsv3.LeagueStandingsV3,
         season=season,
-        timeout=60,
+        timeout=120,
     )
 
     required = ["TeamID", "TeamName", "Record", "WinPCT", "ClinchedPlayoffBirth"]
     standings = standings[required]
 
-    standings["SEASON"] = int(season.split("-")[0])
-    standings["TEAM_ID"] = standings["TeamID"].astype(int)
-    standings["TEAM_NAME"] = standings["TeamName"]
-    standings["WIN_PCT"] = standings["WinPCT"]
-    standings["PLAYOFFS"] = standings["ClinchedPlayoffBirth"].fillna(False).astype(bool)
+    standings = standings.rename(columns={
+        "TeamID": "team_id",
+        "TeamName": "team_name",
+        "Record": "record",
+        "WinPCT": "win_pct",
+    })
 
-    return standings[["SEASON", "TEAM_ID", "TEAM_NAME", "Record", "WIN_PCT", "PLAYOFFS"]]
+    standings["season"] = int(season.split("-")[0])
+    standings["team_id"] = standings["team_id"].astype(int)
+    standings["playoff_clinch"] = standings["ClinchedPlayoffBirth"].fillna(False).astype(bool)
+
+    return standings[["season", "team_id", "team_name", "record", "win_pct", "playoff_clinch"]]
 
 
 def build_historical_dataset(seasons: list[str]) -> pd.DataFrame:
     """
     One orchestrator: fetches all raw data needed for training the MVP model.
+    Returns a single df shaped for PlayerSeasonHistory (plus a 'player_name'
+    helper column used only to upsert the Players reference table).
     """
     frames = []
 
     for season in seasons:
+        print(f"Fetching {season}...", flush=True)
         player_stats = fetch_player_season_stats(season)
         team_standings = fetch_team_standings(season)
+        time.sleep(1)
 
         merged = player_stats.merge(
             team_standings,
-            on=["SEASON", "TEAM_ID"],
-            how="left"
+            on=["season", "team_id"],
+            how="left",
         )
+
+        merged = merged.rename(columns={
+            "record": "team_record",
+            "win_pct": "team_win_pct",
+        })
 
         frames.append(merged)
 
     full_df = pd.concat(frames, ignore_index=True)
 
-    # Add a target column later when you decide the actual modeling setup.
-    # Example:
-    # full_df["MVP_WINNER"] = ...
-    # full_df["MVP_RANK"] = ...
+    # Target columns - fill in once labeling strategy (e.g. scraping actual
+    # MVP voting results) is decided.
+    full_df["mvp_winner"] = False
+    full_df["mvp_rank"] = None
+    full_df["mvp_vote_share"] = None
 
     return full_df
 
 
+PLAYER_SEASON_HISTORY_COLS = [
+    "player_id", "team_id", "season", "pts", "ast", "reb", "off_reb", "def_reb",
+    "stl", "blk", "tov", "fg_pct", "fg3_pct", "ft_pct", "gp", "mpg", "usg_pct",
+    "net_rating", "pie", "ts_pct", "age", "team_record", "team_win_pct",
+    "playoff_clinch", "mvp_winner", "mvp_rank", "mvp_vote_share",
+]
+
+STATS_COLS = [
+    "player_id", "team_id", "season", "pts", "ast", "reb", "off_reb", "def_reb",
+    "stl", "blk", "tov", "fg_pct", "fg3_pct", "ft_pct", "gp", "mpg", "usg_pct",
+    "net_rating", "pie", "ts_pct", "age",
+]
+
+
 def save_historical_dataset(df: pd.DataFrame):
     """
-    Write to a model-focused table.
-    You would normally add a dedicated table in [data/db.py](data/db.py),
-    like player_season_history or award_feature_table.
+    Upserts into Players, Teams, Stats, and PlayerSeasonHistory.
+    Uses session.merge() so re-running for the same season/player/team is safe.
     """
     with Session() as session:
-        # This is just a sketch; your exact table structure depends on your schema.
-        for row in df.to_dict(orient="records"):
-            # Example pseudocode:
-            # session.merge(PlayerSeasonHistory(**row))
-            pass
+        # --- Players (dedupe by player_id, keep latest name seen) ---
+        players = df[["player_id", "player_name"]].drop_duplicates("player_id", keep="last")
+        for row in players.to_dict(orient="records"):
+            session.merge(Players(player_id=row["player_id"], name=row["player_name"]))
+
+        # --- Teams (dedupe by team_id + season) ---
+        teams = df[["team_id", "season", "team_name", "team_record", "team_win_pct", "playoff_clinch"]] \
+            .drop_duplicates(["team_id", "season"], keep="last")
+        for row in teams.to_dict(orient="records"):
+            session.merge(Teams(
+                team_id=row["team_id"],
+                season=row["season"],
+                team_name=row["team_name"],
+                record=row["team_record"],
+                win_pct=row["team_win_pct"],
+                playoff_clinch=row["playoff_clinch"],
+            ))
+
+        # --- Stats (raw per-season stat lines) ---
+        for row in df[STATS_COLS].to_dict(orient="records"):
+            session.merge(Stats(**row))
+
+        # --- PlayerSeasonHistory (model-ready table) ---
+        for row in df[PLAYER_SEASON_HISTORY_COLS].to_dict(orient="records"):
+            session.merge(PlayerSeasonHistory(**row))
 
         session.commit()
 
