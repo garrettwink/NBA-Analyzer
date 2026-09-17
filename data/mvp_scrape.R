@@ -5,7 +5,7 @@ library(RSQLite)
 library(stringr)
 
 # Seasons to collect
-seasons <- c(2020, 2021, 2022, 2023, 2024, 2025)
+seasons <- c(seq(2010, 2025, by=1))
 
 # Fetch all award rows for each season and attach the season column
 all_awards <- list()
@@ -66,4 +66,6 @@ if (nrow(mvp_table) > 0) {
 dbDisconnect(con)
 
 print(mvp_table)
+
+View(mvp_table)
 
