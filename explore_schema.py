@@ -16,6 +16,12 @@ def _():
     stats.head()
 
     names = pd.read_sql_query("SELECT player_id, name FROM players", conn)
+    return (stats,)
+
+
+@app.cell
+def _(stats):
+    stats.head()
     return
 
 

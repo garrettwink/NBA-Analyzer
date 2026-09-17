@@ -6,8 +6,6 @@ export default function Layout() {
     <div>
       <nav>
         <Link to="/">Home</Link>
-        <Link to="/players">Players</Link>
-        <Link to="/search">Search</Link>
       </nav>
       
       <main>
