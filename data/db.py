@@ -21,7 +21,6 @@ class Base(DeclarativeBase):
     pass
 
 
-# Raw player identity data; useful for metadata and lookups.
 class Players(Base):
     __tablename__ = 'players'
 
@@ -34,7 +33,6 @@ class Players(Base):
     weight = Column(String)
 
 
-# Raw seasonal player stats from the NBA API.
 class Stats(Base):
     __tablename__ = 'stats'
     __table_args__ = (PrimaryKeyConstraint('player_id', 'team_id', 'season'),)
@@ -63,7 +61,6 @@ class Stats(Base):
     age = Column(Integer)
 
 
-# Raw team season records.
 class Teams(Base):
     __tablename__ = 'teams'
     __table_args__ = (PrimaryKeyConstraint('team_id', 'season'),)
@@ -76,7 +73,6 @@ class Teams(Base):
     playoff_clinch = Column(Boolean)
 
 
-# Model-ready table: one row per player-season record used for award modeling.
 class PlayerSeasonHistory(Base):
     __tablename__ = 'player_season_history'
     __table_args__ = (PrimaryKeyConstraint('player_id', 'season', 'team_id'),)
@@ -113,7 +109,6 @@ class PlayerSeasonHistory(Base):
     mvp_vote_share = Column(Float, nullable=True)
 
 
-# Current prediction output for the MVP page. This is what the frontend should read.
 class AwardPrediction(Base):
     __tablename__ = 'award_prediction'
 
@@ -132,5 +127,3 @@ class AwardPrediction(Base):
 
 
 Base.metadata.create_all(engine)
-
-
