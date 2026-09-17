@@ -29,37 +29,7 @@ class Players(Base):
     name = Column(String)
     position = Column(String)
     draft_year = Column(String)
-    height = Column(String)
     weight = Column(String)
-
-
-class Stats(Base):
-    __tablename__ = 'stats'
-    __table_args__ = (PrimaryKeyConstraint('player_id', 'team_id', 'season'),)
-
-    player_id = Column(Integer, ForeignKey('players.player_id'))
-    team_id = Column(Integer, ForeignKey('teams.team_id'))
-    season = Column(Integer)
-
-    pts = Column(Float)
-    ast = Column(Float)
-    reb = Column(Float)
-    off_reb = Column(Float)
-    def_reb = Column(Float)
-    stl = Column(Float)
-    blk = Column(Float)
-    tov = Column(Float)
-    fg_pct = Column(Float)
-    fg3_pct = Column(Float)
-    ft_pct = Column(Float)
-    gp = Column(Integer)
-    mpg = Column(Float)
-    usg_pct = Column(Float)
-    net_rating = Column(Float)
-    pie = Column(Float)
-    ts_pct = Column(Float)
-    age = Column(Integer)
-
 
 class Teams(Base):
     __tablename__ = 'teams'

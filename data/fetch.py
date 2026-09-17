@@ -5,7 +5,7 @@ from nba_api.stats.endpoints import leaguedashplayerstats, leaguestandingsv3
 from requests.exceptions import RequestException
 from sqlalchemy.orm import sessionmaker
 
-from db import engine, Players, Teams, Stats, PlayerSeasonHistory
+from db import engine, Players, Teams, PlayerSeasonHistory
 
 Session = sessionmaker(bind=engine)
 
@@ -198,10 +198,6 @@ def save_historical_dataset(df: pd.DataFrame):
                 win_pct=row["team_win_pct"],
                 playoff_clinch=row["playoff_clinch"],
             ))
-
-        # --- Stats (raw per-season stat lines) ---
-        for row in df[STATS_COLS].to_dict(orient="records"):
-            session.merge(Stats(**row))
 
         # --- PlayerSeasonHistory (model-ready table) ---
         for row in df[PLAYER_SEASON_HISTORY_COLS].to_dict(orient="records"):
