@@ -1,5 +1,3 @@
-install.packages("hoopR")
-
 library(hoopR)
 library(dplyr)
 library(DBI)
@@ -61,8 +59,4 @@ if (nrow(mvp_table) > 0) {
 }
 
 dbDisconnect(con)
-
-print(mvp_table)
-
-View(mvp_table)
 

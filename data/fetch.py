@@ -79,7 +79,7 @@ def build_historical_dataset(seasons: list[str]) -> pd.DataFrame:
     frames = []
 
     for season in seasons:
-        print(f"Fetching {season}...", flush=True)
+        print(f"Fetching {season}", flush=True)
         player_stats = fetch_player_season_stats(season)
         team_standings = fetch_team_standings(season)
         time.sleep(1)
