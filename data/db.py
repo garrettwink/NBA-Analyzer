@@ -74,11 +74,6 @@ class PlayerSeasonHistory(Base):
     team_win_pct = Column(Float)
     playoff_clinch = Column(Boolean)
 
-    mvp_winner = Column(Boolean, default=False)
-    mvp_rank = Column(Integer, nullable=True)
-    points_won = Column(Integer, nullable=True)
-    mvp_vote_share = Column(Float, nullable=True)
-
 
 class AwardPrediction(Base):
     __tablename__ = 'award_prediction'

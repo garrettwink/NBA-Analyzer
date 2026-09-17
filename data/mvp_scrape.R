@@ -42,9 +42,11 @@ mvp_table <- all_awards %>%
     points_won,
     award_share
   ) %>%
-  filter(!is.na(player_id)) |>
+  filter(!is.na(player_id)) %>%
   rename(
-    'name' = 'player'
+    'name' = 'player',
+    'mvp_rank' = 'rank',
+    'mvp_vote_share' = 'award_share'
   )
 
 # Save final MVP table to SQLite so it can join with the stats table

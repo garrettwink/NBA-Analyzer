@@ -94,7 +94,7 @@ PLAYER_SEASON_HISTORY_COLS = [
     "player_id", "team_id", "season", "pts", "ast", "reb", "off_reb", "def_reb",
     "stl", "blk", "tov", "fg_pct", "fg3_pct", "ft_pct", "gp", "mpg", "usg_pct",
     "net_rating", "pie", "ts_pct", "age", "team_record", "team_win_pct",
-    "playoff_clinch", "mvp_winner", "mvp_rank", "mvp_vote_share",
+    "playoff_clinch",
 ]
 
 STATS_COLS = [

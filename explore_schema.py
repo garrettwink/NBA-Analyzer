@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.24.0"
+__generated_with = "0.24.2"
 app = marimo.App(width="medium")
 
 
@@ -12,16 +12,39 @@ def _():
     import pandas as pd
 
     conn = sqlite3.connect("nba.db")
-    stats = pd.read_sql_query("SELECT * FROM stats", conn)
-    stats.head()
 
-    names = pd.read_sql_query("SELECT player_id, name FROM players", conn)
-    return (stats,)
+    stat_df = pd.read_sql_query("SELECT * FROM player_season_history", conn)
+    award_df = pd.read_sql_query("SELECT * FROM mvp_awards", conn)
+    return award_df, stat_df
 
 
 @app.cell
-def _(stats):
-    stats.head()
+def _(stat_df):
+    stat_df.head()
+    return
+
+
+@app.cell
+def _(award_df):
+    award_df.head()
+    return
+
+
+@app.cell
+def _(stat_df):
+    stat_df.columns
+    return
+
+
+@app.cell
+def _(award_df):
+    award_df.columns
+    return
+
+
+@app.cell
+def _(stat_df):
+    stat_df.duplicated(subset=['player_id', 'season']).sum()
     return
 
 
