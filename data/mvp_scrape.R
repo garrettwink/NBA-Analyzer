@@ -34,7 +34,6 @@ players_lookup <- dbGetQuery(con, "SELECT name, player_id FROM players") %>%
 # Join the award data to player_id using matching names
 mvp_table <- all_awards %>%
   left_join(players_lookup, by = c("player" = "name")) %>%
-
   select(
     player_id,
     player,
@@ -55,7 +54,7 @@ if (nrow(mvp_table) > 0) {
   dbWriteTable(
     con,
     name = "mvp_awards",
-    value = mvp_table,
+    value = as.data.frame(mvp_table),
     overwrite = FALSE,
     append = TRUE
   )
