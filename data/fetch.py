@@ -86,12 +86,14 @@ def build_historical_dataset(seasons: list[str]) -> pd.DataFrame:
 
         frames.append(combine_player_and_team_data(player_stats, team_standings))
 
-    full_df = pd.concat(frames, ignore_index=True)
-    return add_empty_mvp_labels(full_df)
+    full_df = add_empty_mvp_labels(pd.concat(frames, ignore_index=True))
+    leading_cols = ["player_id", "player_name", "team_id", "team_name"]
+    remaining_cols = [column for column in full_df.columns if column not in leading_cols]
+    return full_df[leading_cols + remaining_cols]
 
 
 PLAYER_SEASON_HISTORY_COLS = [
-    "player_id", "team_id", "season", "pts", "ast", "reb", "off_reb", "def_reb",
+    "player_id", "player_name", "team_id", "team_name", "season", "pts", "ast", "reb", "off_reb", "def_reb",
     "stl", "blk", "tov", "fg_pct", "fg3_pct", "ft_pct", "gp", "mpg", "usg_pct",
     "net_rating", "pie", "ts_pct", "age", "team_record", "team_win_pct",
     "playoff_clinch",

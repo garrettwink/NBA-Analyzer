@@ -43,8 +43,18 @@ def _(award_df):
 
 
 @app.cell
-def _(stat_df):
-    stat_df.duplicated(subset=['player_id', 'season']).sum()
+def _(award_df, stat_df):
+    df3 = stat_df.merge(
+        award_df[['player_id', 'season', 'mvp_rank', 'points_won', 'mvp_vote_share']],
+        on=['player_id', 'season'],
+        how='left'
+    )
+    return (df3,)
+
+
+@app.cell
+def _(df3):
+    df3
     return
 
 

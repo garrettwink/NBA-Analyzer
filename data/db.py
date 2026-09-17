@@ -48,7 +48,9 @@ class PlayerSeasonHistory(Base):
     __table_args__ = (PrimaryKeyConstraint('player_id', 'season', 'team_id'),)
 
     player_id = Column(Integer, ForeignKey('players.player_id'))
+    player_name = Column(String)
     team_id = Column(Integer, ForeignKey('teams.team_id'))
+    team_name = Column(String)
     season = Column(Integer)
 
     pts = Column(Float)

@@ -37,14 +37,11 @@ mvp_table <- all_awards %>%
     player,
     season,
     rank,
-    age,
-    team,
     points_won,
     award_share
   ) %>%
   filter(!is.na(player_id)) %>%
   rename(
-    'name' = 'player',
     'mvp_rank' = 'rank',
     'mvp_vote_share' = 'award_share'
   )
