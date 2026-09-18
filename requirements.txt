@@ -10,6 +10,7 @@ greenlet==3.5.0
 h11==0.16.0
 idna==3.13
 joblib==1.5.3
+marimo
 nba_api==1.11.4
 numpy==2.4.4
 pandas==3.0.2

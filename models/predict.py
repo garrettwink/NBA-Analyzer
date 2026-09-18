@@ -1,6 +1,8 @@
 from dataset import X_test, y_test, id_test
 from train import model
 from sklearn.metrics import mean_absolute_error, mean_squared_error
+import pandas as pd
+import matplotlib.pyplot as plt
 
 predicted_vote_share = model.predict(X_test)
 
