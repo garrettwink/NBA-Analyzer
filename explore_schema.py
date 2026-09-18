@@ -62,7 +62,7 @@ def _(df_final):
 def _(conn, mo):
     _df = mo.sql(
         f"""
-        SELECT * from player_season_history where player_name = 'Shai Gilgeous-Alexander'
+        df_final.loc[df_final['']]
         """,
         engine=conn
     )

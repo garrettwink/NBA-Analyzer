@@ -75,6 +75,7 @@ class PlayerSeasonHistory(Base):
     team_record = Column(String)
     team_win_pct = Column(Float)
     playoff_clinch = Column(Boolean)
+    mvp = Column(Boolean, default=False)
 
 
 class AwardPrediction(Base):

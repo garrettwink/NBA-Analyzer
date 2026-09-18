@@ -96,15 +96,8 @@ PLAYER_SEASON_HISTORY_COLS = [
     "player_id", "player_name", "team_id", "team_name", "season", "pts", "ast", "reb", "off_reb", "def_reb",
     "stl", "blk", "tov", "fg_pct", "fg3_pct", "ft_pct", "gp", "mpg", "usg_pct",
     "net_rating", "pie", "ts_pct", "age", "team_record", "team_win_pct",
-    "playoff_clinch",
+    "playoff_clinch"
 ]
-
-STATS_COLS = [
-    "player_id", "team_id", "season", "pts", "ast", "reb", "off_reb", "def_reb",
-    "stl", "blk", "tov", "fg_pct", "fg3_pct", "ft_pct", "gp", "mpg", "usg_pct",
-    "net_rating", "pie", "ts_pct", "age",
-]
-
 
 def save_historical_dataset(df: pd.DataFrame):
     """
