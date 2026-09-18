@@ -20,17 +20,17 @@ def _():
 
 @app.cell
 def _(award_df, stat_df):
-    df_final = stat_df.merge(
+    df = stat_df.merge(
         award_df[['player_id', 'season', 'mvp_rank', 'points_won', 'mvp_vote_share']],
         on=['player_id', 'season'],
         how='left'
     )
-    return (df_final,)
+    return (df,)
 
 
 @app.cell
-def _(df_final):
-    df_final.fillna(0, inplace=True)
+def _(df):
+    df.columns
     return
 
 
