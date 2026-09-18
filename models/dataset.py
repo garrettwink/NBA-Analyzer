@@ -12,3 +12,9 @@ df = df_stat.merge(
     how='left'
 )
 
+df['mvp_rank'] = pd.to_numeric(df['mvp_rank'], errors='coerce').astype('Int64')
+
+df.loc[df['mvp_rank'] == 1, 'mvp'] = 1
+df.fillna(0, inplace=True)
+
+

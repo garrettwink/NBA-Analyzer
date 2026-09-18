@@ -20,18 +20,18 @@ all_awards <- bind_rows(all_awards)
 
 # Keep only MVP award rows if the table includes an award column
 if ("award" %in% names(all_awards)) {
-  all_awards <- all_awards %>%
+  all_awards <- all_awards |>
     filter(grepl("MVP", award, ignore.case = TRUE))
 }
 
 # Pull player lookup from SQLite to map names to player_id
 con <- dbConnect(RSQLite::SQLite(), "nba.db")
-players_lookup <- dbGetQuery(con, "SELECT name, player_id FROM players") %>%
+players_lookup <- dbGetQuery(con, "SELECT name, player_id FROM players") |>
   select(player_id, name)
 
 # Join the award data to player_id using matching names
-mvp_table <- all_awards %>%
-  left_join(players_lookup, by = c("player" = "name")) %>%
+mvp_table <- all_awards |>
+  left_join(players_lookup, by = c("player" = "name")) |>
   select(
     player_id,
     player,
@@ -39,11 +39,11 @@ mvp_table <- all_awards %>%
     rank,
     points_won,
     award_share
-  ) %>%
-  filter(!is.na(player_id)) %>%
+  ) |>
+  filter(!is.na(player_id)) |>
   rename(
-    'mvp_rank' = 'rank',
-    'mvp_vote_share' = 'award_share'
+    "mvp_rank" = "rank",
+    "mvp_vote_share" = "award_share"
   )
 
 # Save final MVP table to SQLite so it can join with the stats table

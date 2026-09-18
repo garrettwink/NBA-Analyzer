@@ -15,31 +15,7 @@ def _():
 
     stat_df = pd.read_sql_query("SELECT * FROM player_season_history", conn)
     award_df = pd.read_sql_query("SELECT * FROM mvp_awards", conn)
-    return award_df, conn, mo, stat_df
-
-
-@app.cell
-def _(stat_df):
-    stat_df.head()
-    return
-
-
-@app.cell
-def _(award_df):
-    award_df.head()
-    return
-
-
-@app.cell
-def _(stat_df):
-    stat_df.columns
-    return
-
-
-@app.cell
-def _(award_df):
-    award_df.columns
-    return
+    return award_df, stat_df
 
 
 @app.cell
@@ -54,18 +30,7 @@ def _(award_df, stat_df):
 
 @app.cell
 def _(df_final):
-    df_final
-    return
-
-
-@app.cell
-def _(conn, mo):
-    _df = mo.sql(
-        f"""
-        df_final.loc[df_final['']]
-        """,
-        engine=conn
-    )
+    df_final.fillna(0, inplace=True)
     return
 
 
