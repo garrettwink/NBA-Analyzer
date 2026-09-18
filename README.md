@@ -1,3 +1,3 @@
-## NBA Viewer and Analyzer
+## MVPredictor
 
-Simple webpage to view players, stats, and teams. Future implementation with ML models to predict awards/bets. Currently, work in progress.
+ML Model to predict the current leader for the NBA's MVP award. Work in progress, additional awards to be added as well.
